@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         start = (Button) findViewById(R.id.start);
-        stop = (Button) findViewById(R.id.stop);
+        stop = (Button) findViewById(R.id.stop); // tes commit
 
         start.setOnClickListener(this);
         stop.setOnClickListener(this);
