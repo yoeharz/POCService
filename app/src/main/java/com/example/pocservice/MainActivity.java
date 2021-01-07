@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,7 +29,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         start.setOnClickListener(this);
         stop.setOnClickListener(this);
 
-        intentServices = new Intent(this, MediaPlayerService.class);
+        /*intentServices = new Intent(this, MediaPlayerService.class);
 
         boolean isMyServiceRunning = false;
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
@@ -39,9 +40,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         if(isMyServiceRunning ==  false){
-            startService(intentServices);
-        }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intentServices);
+            }else{
+                startService(intentServices);
+            }
+        }*/
 
+    }
+
+    @Override
+    protected void onResume() {
+        Log.i("aaa", "Masuk on resume");
+        super.onResume();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+            boolean isMyServiceRunning = false;
+            ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+            for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)){
+                if(MediaPlayerService.class.getName().equals(service.service.getClassName())){
+                    isMyServiceRunning = true;
+                }
+            }
+
+            Log.i("aaa", "Masuk on resume: "+isMyServiceRunning);
+            if(isMyServiceRunning ==  false){
+                MediaPlayerReceiver.scheduleJob(getApplicationContext());
+            }
+
+        } else {
+            ServiceAdmin bck = new ServiceAdmin();
+            bck.launchService(getApplicationContext());
+        }
     }
 
     @Override
@@ -59,7 +88,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startService(intentServices);
             }
         }else if(view == stop){
-            stopService(intentServices);
+            boolean isMyServiceRunning = false;
+            ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+            for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)){
+                if(MediaPlayerService.class.getName().equals(service.service.getClassName())){
+                    isMyServiceRunning = true;
+                }
+            }
+
+            if(isMyServiceRunning == true){
+                stopService(intentServices);
+            }
         }
     }
 

@@ -3,6 +3,7 @@ package com.example.pocservice;
 import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.util.Log;
@@ -35,6 +36,14 @@ public class MediaPlayerService extends Service {
         Intent broadcastIntent = new Intent(this, MediaPlayerReceiver.class);
         sendBroadcast(broadcastIntent);
         if(player != null){ player.stop();}
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.i("aaa", "masuk stop foreground");
+            stopForeground(true);
+        } else {
+            Log.i("aaa", "masuk stop self");
+            stopSelf();
+        }
 
     }
 
