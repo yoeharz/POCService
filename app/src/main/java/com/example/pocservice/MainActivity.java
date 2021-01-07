@@ -3,6 +3,8 @@ package com.example.pocservice;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ActivityManager;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -55,16 +57,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onResume();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
             boolean isMyServiceRunning = false;
-            ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-            for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)){
-                if(MediaPlayerService.class.getName().equals(service.service.getClassName())){
-                    isMyServiceRunning = true;
+            JobScheduler scheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
+            for ( JobInfo jobInfo : scheduler.getAllPendingJobs() ) {
+                if ( jobInfo.getId() == 1 ) {
+                    isMyServiceRunning = true ;
+                    break ;
                 }
             }
 
             Log.i("aaa", "Masuk on resume: "+isMyServiceRunning);
             if(isMyServiceRunning ==  false){
-                MediaPlayerReceiver.scheduleJob(getApplicationContext());
+                intentServices = new Intent(this, MediaPlayerService.class);
+
+                boolean isMyServiceRunning1 = false;
+                ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+                for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)){
+                    if(MediaPlayerService.class.getName().equals(service.service.getClassName())){
+                        isMyServiceRunning1 = true;
+                    }
+                }
+
+                if(isMyServiceRunning1 ==  false) {
+
+                    startService(intentServices);
+                }
             }
 
         } else {
