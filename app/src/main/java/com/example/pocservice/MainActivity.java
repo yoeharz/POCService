@@ -15,83 +15,53 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private Button start, stop;
+    private Button start, stop, cancelJob;
     private Intent intentServices;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        /*new ServiceAdmin().stopService(this);*/
+
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         start = (Button) findViewById(R.id.start);
-        stop = (Button) findViewById(R.id.stop); // tes commit
+        stop = (Button) findViewById(R.id.stop);
+        cancelJob = (Button) findViewById(R.id.cancelJob);
 
         start.setOnClickListener(this);
         stop.setOnClickListener(this);
 
-        /*intentServices = new Intent(this, MediaPlayerService.class);
 
-        boolean isMyServiceRunning = false;
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)){
-            if(MediaPlayerService.class.getName().equals(service.service.getClassName())){
-                isMyServiceRunning = true;
-            }
-        }
-
-        if(isMyServiceRunning ==  false){
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(intentServices);
-            }else{
-                startService(intentServices);
-            }
-        }*/
-
+        Intent xIntent = new Intent(this, MediaPlayerService.class);
+        xIntent.putExtra("keyx",1);
+        startService(xIntent);
+        boolean x = stopService(xIntent);
+        Log.i("xxx", "x = "+x);
+        //JobScheduler jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
+        //jobScheduler.cancel(123);
+        Log.i("aaa","execute service 2");
+        Intent xIntent2 = new Intent(this, MediaPlayerService.class);
+        xIntent2.putExtra("keyx",0);
+        startService(xIntent2);
+        Log.i("aaa","selesai execute service 2");
     }
 
     @Override
     protected void onResume() {
-        Log.i("aaa", "Masuk on resume");
+        //Log.i("xxx")
         super.onResume();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-            boolean isMyServiceRunning = false;
-            JobScheduler scheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
-            for ( JobInfo jobInfo : scheduler.getAllPendingJobs() ) {
-                if ( jobInfo.getId() == 1 ) {
-                    isMyServiceRunning = true ;
-                    break ;
-                }
-            }
-
-            Log.i("aaa", "Masuk on resume: "+isMyServiceRunning);
-            if(isMyServiceRunning ==  false){
-                intentServices = new Intent(this, MediaPlayerService.class);
-
-                boolean isMyServiceRunning1 = false;
-                ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-                for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)){
-                    if(MediaPlayerService.class.getName().equals(service.service.getClassName())){
-                        isMyServiceRunning1 = true;
-                    }
-                }
-
-                if(isMyServiceRunning1 ==  false) {
-
-                    startService(intentServices);
-                }
-            }
-
-        } else {
-            ServiceAdmin bck = new ServiceAdmin();
-            bck.launchService(getApplicationContext());
-        }
     }
 
     @Override
     public void onClick(View view) {
         if(view == start){
+            intentServices = new Intent(this, MediaPlayerService.class);
             boolean isMyServiceRunning = false;
             ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
             for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)){
@@ -115,12 +85,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if(isMyServiceRunning == true){
                 stopService(intentServices);
             }
+        }else if(view == cancelJob){
+            JobScheduler jobScheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
+            jobScheduler.cancel(123);
         }
     }
 
     @Override
     protected void onDestroy() {
         Log.i("aaa", "MAsuk on destroy main activity");
+        intentServices = new Intent(this, MediaPlayerService.class);
         boolean isMyServiceRunning = false;
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)){

@@ -1,5 +1,6 @@
 package com.example.pocservice;
 
+import android.app.ActivityManager;
 import android.app.job.JobParameters;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +11,8 @@ import android.provider.Settings;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
+
+import java.util.List;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class JobService extends android.app.job.JobService {
@@ -22,8 +25,39 @@ public class JobService extends android.app.job.JobService {
     @Override
     public boolean onStartJob(JobParameters jobParameters) {
         Log.i("aaa", "Masuk onstart job");
-        ServiceAdmin serviceAdmin = new ServiceAdmin();
-        serviceAdmin.launchService(this);
+
+        ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> procInfos = activityManager.getRunningAppProcesses();
+        boolean prosesJangan = false;
+        if (procInfos != null)
+        {
+            for (final ActivityManager.RunningAppProcessInfo processInfo : procInfos) {
+                Log.i("aaa", processInfo.processName);
+                if(processInfo.processName.equalsIgnoreCase("com.example.pocservice") &&
+                        processInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND){
+                    prosesJangan = true;
+                }
+            }
+        }
+
+        if(prosesJangan){
+            Log.i("aaa", "masuk proses jangan");
+            boolean isMyServiceRunning = false;
+            //ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+            for(ActivityManager.RunningServiceInfo service : activityManager.getRunningServices(Integer.MAX_VALUE)){
+                if(MediaPlayerService.class.getName().equals(service.service.getClassName())){
+                    isMyServiceRunning = true;
+                }
+            }
+
+            if(isMyServiceRunning == false){
+                startService(new Intent(this, MediaPlayerService.class));;
+            }
+        }else {
+            Log.i("aaa", "tidak masuk proses jangan");
+            ServiceAdmin serviceAdmin = new ServiceAdmin();
+            serviceAdmin.launchService(this);
+        }
         instance = this;
         JobService.jobParameters = jobParameters;
         return false;
@@ -62,7 +96,7 @@ public class JobService extends android.app.job.JobService {
     @Override
     public boolean onStopJob(JobParameters jobParameters) {
         Log.i("aaa", "Stoping job");
-        Intent broadcastIntent = new Intent(Globals.RESTART_INTENT);
+        /*Intent broadcastIntent = new Intent(Globals.RESTART_INTENT);
         sendBroadcast(broadcastIntent);
 
         // give the time to run
@@ -72,7 +106,7 @@ public class JobService extends android.app.job.JobService {
                 unregisterReceiver(mediaPlayerReceiver);
                 stopJob();
             }
-        },1000);
+        },1000);*/
         return false;
     }
 

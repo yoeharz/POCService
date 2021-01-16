@@ -34,6 +34,7 @@ public class ServiceAdmin {
             ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
             for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)){
                 if(MediaPlayerService.class.getName().equals(service.service.getClassName())){
+                    Log.i("aaa", service.service.getClassName());
                     isMyServiceRunning = true;
                 }
             }
@@ -49,5 +50,11 @@ public class ServiceAdmin {
             context.startService(serviceIntent);
         }
         Log.d("aaa", "launchService:  Service is starting....");
+    }
+
+    public void stopService(Context context){
+        Log.i("aaa", "Sempet masuk stop services");
+        setServiceIntent(context);
+        context.stopService(serviceIntent);
     }
 }

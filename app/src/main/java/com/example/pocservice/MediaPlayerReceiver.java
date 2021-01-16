@@ -1,5 +1,6 @@
 package com.example.pocservice;
 
+import android.app.ActivityManager;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.BroadcastReceiver;
@@ -11,6 +12,8 @@ import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 
+import java.util.List;
+
 public class MediaPlayerReceiver extends BroadcastReceiver {
 
     private static JobScheduler jobScheduler;
@@ -21,10 +24,11 @@ public class MediaPlayerReceiver extends BroadcastReceiver {
         Log.i("aaa", "Masuk receiver");
         //context.startService(new Intent(context, MediaPlayerService.class));
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Log.i("aaa", "Build version diatas atau sama dengan lolipop");
+            context.stopService(new Intent(context, MediaPlayerService.class));
             scheduleJob(context);
-        }else{
+        } else {
             Log.i("aaa", "Build version dibawah lolipop");
             registerRestarterReceiver(context);
             ServiceAdmin bck = new ServiceAdmin();
@@ -33,10 +37,10 @@ public class MediaPlayerReceiver extends BroadcastReceiver {
 
         if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
             Log.i("aaa", "Masuk setelah boot");
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 Log.i("aaa", "Build version diatas atau sama dengan lolipop");
                 scheduleJob(context);
-            }else{
+            } else {
                 Log.i("aaa", "Build version dibawah lolipop");
                 registerRestarterReceiver(context);
                 ServiceAdmin bck = new ServiceAdmin();
@@ -51,7 +55,7 @@ public class MediaPlayerReceiver extends BroadcastReceiver {
         }
 
         ComponentName componentName = new ComponentName(context, JobService.class);
-        JobInfo jobInfo = new JobInfo.Builder(1, componentName).setOverrideDeadline(0).setPersisted(true).build();
+        JobInfo jobInfo = new JobInfo.Builder(123, componentName).setOverrideDeadline(0).setPersisted(true).build();
         jobScheduler.schedule(jobInfo);
     }
 

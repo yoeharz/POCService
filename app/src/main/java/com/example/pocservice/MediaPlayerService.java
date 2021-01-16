@@ -13,13 +13,27 @@ import androidx.annotation.Nullable;
 public class MediaPlayerService extends Service {
 
     private MediaPlayer player;
+    int xKey = 0;
+
+    @Override
+    public void onCreate() {
+        //startForegroundService(new Intent(this, MediaPlayerService.class));
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i("aaa","Masuk start services");
-        player = MediaPlayer.create(this, Settings.System.DEFAULT_ALARM_ALERT_URI);
-        player.setLooping(true);
-        player.start();
+
+        xKey = intent.getIntExtra("keyx",0);
+
+        if(xKey == 1) {
+            stopForeground(true);
+            stopSelf();
+        }else{
+            player = MediaPlayer.create(this, Settings.System.DEFAULT_ALARM_ALERT_URI);
+            player.setLooping(true);
+            player.start();
+        }
         return START_STICKY;
     }
 
@@ -33,13 +47,19 @@ public class MediaPlayerService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Log.i("aaa","Masuk destroy services");
-        Intent broadcastIntent = new Intent(this, MediaPlayerReceiver.class);
-        sendBroadcast(broadcastIntent);
+        if(xKey == 0) {
+            Intent broadcastIntent = new Intent(this, MediaPlayerReceiver.class);
+            sendBroadcast(broadcastIntent);
+        }
         if(player != null){ player.stop();}
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Log.i("aaa", "masuk stop foreground");
+            Log.i("aaa", "masuk stop foreground: "+xKey);
             stopForeground(true);
+            if(xKey == 1) {
+                xKey = 0;
+                stopSelf();
+            }
         } else {
             Log.i("aaa", "masuk stop self");
             stopSelf();
